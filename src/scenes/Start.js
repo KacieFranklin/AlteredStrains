@@ -97,5 +97,4 @@ export class Start extends Phaser.Scene {
         this.ship.y += this.ship.acceleration.y * delta;
         this.background.tilePositionX += 0.6 * delta;
     }
-    
 }
