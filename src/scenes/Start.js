@@ -5,17 +5,21 @@ export class Start extends Phaser.Scene {
     }
 
     create() {
-        this.background = this.add.tileSprite(640, 360, 1280, 720, 'background');
-        const logo = this.add.image(640, 200, 'logo');
-
+        this.tiles = [];
+        this.background = this.add.tileSprite(160, 90, 320, 180, 'background');
+        this.grass = this.add.tileSprite(160, 90, 240, 240, 'grass');
+        const reaper = this.add.image(640, 200, 'reaper');
         this.debugText = this.add.text(10, 10, "debug:");
-
-        this.kraft = this.add.sprite(640, 360, 'kraft');
-        this.kraft.scale = 4;
-        logo.scale = 4;
+        this.kraft = this.physics.add.sprite(160, 90, 'kraft');
+        this.cameras.main.setVisible(false);
+        this.view = this.cameras.add(0, 0, 1280, 720, true, 'view');
+        
+        this.view.zoom = 4;
+        this.view.startFollow(this.kraft, false, 0.8, 0.8);
+        this.view.setDeadzone(64, 32);
 
         this.buffer = [];
-        
+
         this.kraft.anims.create({
             key: 'walk down',
             frames: this.anims.generateFrameNumbers('kraft', { start: 0, end: 3 }),
@@ -44,7 +48,7 @@ export class Start extends Phaser.Scene {
         this.kraft.play('walk down');
 
         this.tweens.add({
-            targets: logo,
+            targets: reaper,
             y: 400,
             duration: 1500,
             ease: 'Sine.inOut',
@@ -84,10 +88,24 @@ export class Start extends Phaser.Scene {
     update(time, delta) {
         this.handleAccelDecel();
         this.turnToFaceDirection();
-
+        this.attemptEncounter();
+        //this.centreCamera();
         this.kraft.x += this.kraft.velocity.x * delta;
         this.kraft.y += this.kraft.velocity.y * delta;
-        this.background.tilePositionX += 0.6 * delta;
+    }
+
+    attemptEncounter() {
+        const num = Math.floor(Math.random() * 500);
+        if (num == 300) {
+            this.debugText.text = "ding ding!";
+            this.scene.start('Battle');
+        }
+        if (this.physics.overlap(this.kraft, this.grass) && num == 300) {
+            this.scene.start('Battle');
+        };
+    }
+
+    centreCamera() {
     }
 
     debuffer(value) {
@@ -100,19 +118,25 @@ export class Start extends Phaser.Scene {
     }
 
     turnToFaceDirection() {
-        const current = this.kraft.facing;
-        if (current === this.currentDir) {
+        const newDir = this.kraft.facing;
+        if (newDir === this.currentDir) {
             return;
         }
-        switch (current){
+        switch (newDir){
             case(this.Dir.DOWN):
-                this.kraft.play('move down');
+                this.kraft.play('walk down');
                 break;
             case(this.Dir.UP):
+                this.kraft.play('walk up');
+                break;
             case(this.Dir.RIGHT):
+                this.kraft.play('walk right');
+                break;
             case(this.Dir.LEFT):
-            default:
+                this.kraft.play('walk left');
+                break;
         }
+        this.currentDir = newDir;
     }
 
     handleAccelDecel() {
@@ -148,6 +172,6 @@ export class Start extends Phaser.Scene {
         this.kraft.velocity.y = velocity.y.toFixed(4);
         this.kraft.velocity.x = velocity.x.toFixed(4);
 
-        this.debugText.text = "[DEBUG] A = [" + this.kraft.velocity.x + " " + this.kraft.velocity.y + "] "; 
+        //this.debugText.text = "[DEBUG] A = [" + this.kraft.velocity.x + " " + this.kraft.velocity.y + "] "; 
     }
 }
