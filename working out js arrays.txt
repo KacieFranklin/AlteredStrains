@@ -1,0 +1,7 @@
+buffer = [rt rt dt rf ut dt uf df rt lt rf rt]
+-0.2, 0.9
+
+
+buffer = [r d l r]
+vX = -0.19
+vY = 0.855

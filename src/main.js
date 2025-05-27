@@ -7,8 +7,8 @@ const config = {
     title: 'Altered Strains',
     description: '',
     parent: 'game-container',
-    width: 1280,
-    height: 720,
+    width: 1280, // 320
+    height: 720, // 180
     backgroundColor: '#000000',
     pixelArt: true,
     scale: {

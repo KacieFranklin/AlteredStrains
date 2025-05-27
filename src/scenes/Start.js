@@ -10,7 +10,9 @@ export class Start extends Phaser.Scene {
         this.grass = this.add.tileSprite(160, 90, 240, 240, 'grass');
         const reaper = this.add.image(640, 200, 'reaper');
         this.debugText = this.add.text(10, 10, "debug:");
+        this.debugText.setFontStyle('main-font');
         this.kraft = this.physics.add.sprite(160, 90, 'kraft');
+        this.textbox = this.add.image(40, 100, 'text-box');
         this.cameras.main.setVisible(false);
         this.view = this.cameras.add(0, 0, 1280, 720, true, 'view');
         
