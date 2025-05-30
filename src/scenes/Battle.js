@@ -24,7 +24,7 @@ export class Battle extends Phaser.Scene {
         let i = 0;
 
         for (i; i < this.enemyList.length; i++){
-            
+            this.addToBattle(this.enemyList[i]);
         }
 
         this.addToParty('kraftBattle');
@@ -43,7 +43,7 @@ export class Battle extends Phaser.Scene {
         this.attackText.setAlign('center');
         this.attackText.setOrigin(0.5, 0.25);
 
-        this.healText = this.add.text(125, 150, 'RESTORE', { fontSize: '16px', fill: '#FFF', font: 'main-font' });
+        this.healText = this.add.text(125, 150, 'HEAL', { fontSize: '16px', fill: '#FFF', font: 'main-font' });
         this.healText.setFixedSize(50, 30);
         this.healText.setAlign('center');
         this.healText.setOrigin(0.5, 0.25);
@@ -96,7 +96,7 @@ export class Battle extends Phaser.Scene {
             precision: 0,
             catchMod: 150
         };
-        switch (this.enemyList[i]){
+        switch (enemyType){
                 case (this.Enemy.SUBJECT):
                     key = 'subject58';
                     stats = {

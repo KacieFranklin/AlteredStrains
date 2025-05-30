@@ -17,7 +17,8 @@ export class Start extends Phaser.Scene {
             REAPER:1,
             CONJOINED:2,
             SWEET_TOOTH:3,
-            ZERO:4
+            ZERO:4,
+            KRAFT:4
         })
 
         this.grass = this.add.tileSprite(160, 0, 320, 720, 'grass');
@@ -29,7 +30,8 @@ export class Start extends Phaser.Scene {
         this.view = this.cameras.add(0, 0, 1280, 720, true, 'view');
         this.view.setBounds(0, -360, this.grass.width, this.grass.height);
 
-        this.party = [this.kraft];
+        this.storage = [];
+        this.party = [this.Enemy.KRAFT];
         this.battle = [this.Enemy.REAPER, -1, -1];
         
         this.view.zoom = 4;
@@ -145,6 +147,10 @@ export class Start extends Phaser.Scene {
         else {
             this.battle = [this.Enemy.CONJOINED, this.Enemy.CONJOINED, this.Enemy.CONJOINED];
         }
+    }
+
+    getPartyList() {
+        return this.party;
     }
 
     getEnemyList() {
