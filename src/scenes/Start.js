@@ -29,6 +29,7 @@ export class Start extends Phaser.Scene {
         this.view = this.cameras.add(0, 0, 1280, 720, true, 'view');
         this.view.setBounds(0, -360, this.grass.width, this.grass.height);
 
+        this.party = [this.kraft];
         this.battle = [this.Enemy.REAPER, -1, -1];
         
         this.view.zoom = 4;

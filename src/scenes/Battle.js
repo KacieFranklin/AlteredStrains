@@ -34,8 +34,8 @@ export class Battle extends Phaser.Scene {
         this.textbox = this.add.image(160, 150, 'text-box');
 
         this.attack = this.add.sprite(55, 150, 'battleBox');
-        this.party = this.add.sprite(125, 150, 'battleBox');
-        this.bag = this.add.sprite(195, 150, 'battleBox');
+        this.heal = this.add.sprite(125, 150, 'battleBox');
+        this.sedate = this.add.sprite(195, 150, 'battleBox');
         this.run = this.add.sprite(265, 150, 'battleBox');
 
         this.attackText = this.add.text(55, 150, 'ATTACK', { fontSize: '16px', fill: '#FFF', font: 'main-font' });
@@ -43,15 +43,15 @@ export class Battle extends Phaser.Scene {
         this.attackText.setAlign('center');
         this.attackText.setOrigin(0.5, 0.25);
 
-        this.partyText = this.add.text(125, 150, 'PARTY', { fontSize: '16px', fill: '#FFF', font: 'main-font' });
-        this.partyText.setFixedSize(50, 30);
-        this.partyText.setAlign('center');
-        this.partyText.setOrigin(0.5, 0.25);
+        this.healText = this.add.text(125, 150, 'RESTORE', { fontSize: '16px', fill: '#FFF', font: 'main-font' });
+        this.healText.setFixedSize(50, 30);
+        this.healText.setAlign('center');
+        this.healText.setOrigin(0.5, 0.25);
 
-        this.bagText = this.add.text(195, 150, 'ITEMS', { fontSize: '16px', fill: '#FFF', font: 'main-font' });
-        this.bagText.setFixedSize(50, 30);
-        this.bagText.setAlign('center');
-        this.bagText.setOrigin(0.5, 0.25);
+        this.sedateText = this.add.text(195, 150, 'SEDATE', { fontSize: '16px', fill: '#FFF', font: 'main-font' });
+        this.sedateText.setFixedSize(50, 30);
+        this.sedateText.setAlign('center');
+        this.sedateText.setOrigin(0.5, 0.25);
 
         this.runText = this.add.text(265, 150, 'ESCAPE', { fontSize: '16px', fill: '#FFF', font: 'main-font' });
         this.runText.setFixedSize(50, 30);
