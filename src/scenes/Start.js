@@ -5,20 +5,35 @@ export class Start extends Phaser.Scene {
     }
 
     create() {
-        this.tiles = [];
-        this.background = this.add.tileSprite(160, 90, 320, 180, 'background');
-        this.grass = this.add.tileSprite(160, 90, 240, 240, 'grass');
-        const reaper = this.add.image(640, 200, 'reaper');
+        this.Dir = Object.freeze({
+            DOWN:0,
+            UP:1,
+            RIGHT:2,
+            LEFT:3
+        });
+
+        this.Enemy = Object.freeze({
+            SUBJECT:0,
+            REAPER:1,
+            CONJOINED:2,
+            SWEET_TOOTH:3,
+            ZERO:4
+        })
+
+        this.grass = this.add.tileSprite(160, 0, 320, 720, 'grass');
+        this.initMap();
         this.debugText = this.add.text(10, 10, "debug:");
         this.debugText.setFontStyle('main-font');
         this.kraft = this.physics.add.sprite(160, 90, 'kraft');
-        this.textbox = this.add.image(40, 100, 'text-box');
         this.cameras.main.setVisible(false);
         this.view = this.cameras.add(0, 0, 1280, 720, true, 'view');
+        this.view.setBounds(0, -360, this.grass.width, this.grass.height);
+
+        this.battle = [this.Enemy.REAPER, -1, -1];
         
         this.view.zoom = 4;
-        this.view.startFollow(this.kraft, false, 0.8, 0.8);
-        this.view.setDeadzone(64, 32);
+        this.view.startFollow(this.kraft, false, 0.1, 0.1);
+        this.view.setDeadzone(8, 4);
 
         this.buffer = [];
 
@@ -49,31 +64,19 @@ export class Start extends Phaser.Scene {
 
         this.kraft.play('walk down');
 
-        this.tweens.add({
-            targets: reaper,
-            y: 400,
-            duration: 1500,
-            ease: 'Sine.inOut',
-            yoyo: true,
-            loop: -1
-        });
-
         this.cursors = this.input.keyboard.createCursorKeys();
         const keyObjects = this.input.keyboard.addKeys({
             up: "W",
             down: "S",
             left: "A",
-            right: "D"
-        });
-
-        this.Dir = Object.freeze({
-            DOWN:0,
-            UP:1,
-            RIGHT:2,
-            LEFT:3
+            right: "D",
+            battle: "P",
+            next: "up",
+            previous: "down"
         });
 
         this.kraft.velocity = {x:0, y:0};
+        this.kraft.isMoving = false;
         this.kraft.facing = this.Dir.DOWN;
         this.currentDir = this.Dir.DOWN;
 
@@ -85,12 +88,13 @@ export class Start extends Phaser.Scene {
         keyObjects.right.on("up", () =>{this.debuffer(this.Dir.RIGHT)}); // if right is released
         keyObjects.left.on("down", () =>{this.buffer.push(this.Dir.LEFT)}); // if left is pressed
         keyObjects.left.on("up", () =>{this.debuffer(this.Dir.LEFT)}); // if left is released
+        keyObjects.battle.on("up",() =>{this.scene.run('Battle'); this.clearMovement(); this.scene.sleep('Start');})
     }
 
     update(time, delta) {
         this.handleAccelDecel();
         this.turnToFaceDirection();
-        this.attemptEncounter();
+        if (this.kraft.isMoving == true) this.attemptEncounter();
         //this.centreCamera();
         this.kraft.x += this.kraft.velocity.x * delta;
         this.kraft.y += this.kraft.velocity.y * delta;
@@ -98,25 +102,98 @@ export class Start extends Phaser.Scene {
 
     attemptEncounter() {
         const num = Math.floor(Math.random() * 500);
+        
         if (num == 300) {
+            this.randomiseBattle();
             this.debugText.text = "ding ding!";
-            this.scene.start('Battle');
+            this.scene.run('Battle');
+            this.clearMovement();
+            this.scene.sleep('Start');
         }
-        if (this.physics.overlap(this.kraft, this.grass) && num == 300) {
-            this.scene.start('Battle');
+        if (this.physics.overlap(this.kraft, this.grass) && num < 150) {
+            //this.scene.add('Battle');
         };
+    }
+
+    randomiseBattle() {
+        const num = Math.floor(Math.random() * 100);
+        if (num < 10) {
+            this.battle = [this.Enemy.REAPER, -1, -1];
+        }
+        else if (num < 20) {
+            this.battle = [this.Enemy.REAPER, this.Enemy.REAPER, -1];
+        }
+        else if (num < 30) {
+            this.battle = [this.Enemy.REAPER, this.Enemy.REAPER, this.Enemy.REAPER];
+        }
+        else if (num < 50) {
+            this.battle = [this.Enemy.CONJOINED, -1, -1];
+        }
+        else if (num < 65) {
+            this.battle = [this.Enemy.REAPER, this.Enemy.CONJOINED, -1];
+        }
+        else if (num < 70) {
+            this.battle = [this.Enemy.REAPER, this.Enemy.CONJOINED, this.Enemy.REAPER];
+        }
+        else if (num < 85) {
+            this.battle = [this.Enemy.CONJOINED, this.Enemy.CONJOINED, -1];
+        }
+        else if (num < 95) {
+            this.battle = [this.Enemy.CONJOINED, this.Enemy.REAPER, this.Enemy.CONJOINED];
+        }
+        else {
+            this.battle = [this.Enemy.CONJOINED, this.Enemy.CONJOINED, this.Enemy.CONJOINED];
+        }
+    }
+
+    getEnemyList() {
+        return this.battle;
+    }
+
+    initMap() {
+        const map_P = this.add.tilemap('main-path_Path', 16, 16);
+        const map_M = this.add.tilemap('main-path_Mountain', 16, 16);
+        const map_B = this.add.tilemap('main-path_Berry', 16, 16);
+        const tiles_P = map_P.addTilesetImage('plains');
+        const tiles_M = map_M.addTilesetImage('plains');
+        const tiles_B = map_B.addTilesetImage('plains');
+        this.pathLayer = map_P.createLayer(0, tiles_P, 0, -360);
+        this.mountainLayer = map_M.createLayer(0, tiles_M, 0, -360);
+        this.berryLayer = map_B.createLayer(0, tiles_B, 0, -360);
     }
 
     centreCamera() {
     }
 
     debuffer(value) {
-        const lastIndex = this.buffer.indexOf(value);
-        if (lastIndex === -1){
-            return;
+        let valueInBuffer = true;
+        while (valueInBuffer) {
+            const lastIndex = this.buffer.indexOf(value);
+            if (lastIndex === -1) {
+                valueInBuffer = false;
+            }
+            else {
+                this.buffer.splice(lastIndex, 1);
+            }
         }
-        this.buffer.splice(lastIndex, 1);
+        if (this.buffer.length == 0) {
+            this.stopMoveAnim();
+        }
         //this.debugText.text = "[DEBUG] index:" + lastIndex + ", value:" + value + ", bufferState:" + this.buffer;
+    }
+
+    clearMovement() {
+        this.buffer = [];
+        this.kraft.velocity = {x:0, y:0};
+        this.kraft.anims.setCurrentFrame(this.kraft.anims.get(this.kraft.anims.getName()).getFrameAt(0));
+        this.kraft.stop();
+        this.kraft.isMoving = false;
+    }
+
+    stopMoveAnim() {
+        const curAnim = this.kraft.anims.getName();
+        const firstFrame = this.kraft.anims.get(curAnim).getFrameAt(0);
+        this.kraft.anims.stopOnFrame(firstFrame);
     }
 
     turnToFaceDirection() {
@@ -139,12 +216,13 @@ export class Start extends Phaser.Scene {
                 break;
         }
         this.currentDir = newDir;
+        this.kraft.isMoving = true;
     }
 
     handleAccelDecel() {
         const velocity = Object.assign({}, this.kraft.velocity);
-        velocity.x *= .95;
-        velocity.y *= .95;
+        velocity.x *= .9;
+        velocity.y *= .9;
         const acc = {x:0, y:0};
 
         if (this.buffer.includes(this.Dir.DOWN)){
@@ -166,6 +244,10 @@ export class Start extends Phaser.Scene {
         if (absVelocity > 0) {
             acc.x *= 0.01/absVelocity;
             acc.y *= 0.01/absVelocity;
+        }
+        else { //if absVelocity == 0
+            this.stopMoveAnim();
+            this.kraft.isMoving = false;
         }
 
         velocity.x += acc.x;
